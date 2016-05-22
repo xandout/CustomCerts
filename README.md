@@ -2,7 +2,12 @@
 
 First you need to get a certificate
 
-`echo -n | openssl s_client -connect google.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > google.pem`
+`echo -n | openssl s_client -showcerts -connect google.com:443`
+
+You will want to copy the last certificate, including `-----BEGIN CERTIFICATE-----`
+and `-----END CERTIFICATE-----` into a file such as googleca.pem
+
+
 
 Next you will want to store it into a truststore, this will create one of "cacerts" doesn't exist.
 
@@ -43,3 +48,21 @@ Or you can set the truststore in your code
 	String cacertsFilePath = file.getAbsolutePath();
 	getLogger().info("Setting trustStore to {}", cacertsFilePath);
 	System.setProperty("javax.net.ssl.trustStore", cacertsFilePath);
+
+
+#Usage
+
+This will be successful since we have the CA for google.com
+
+    java -jar customcerts-1.0-SNAPSHOT-jar-with-dependencies.jar https://google.com
+    Set TrustStore to /Users/mturner/source-code/CustomCertsGH/target/cacerts
+    Success, no errors
+
+This will fail since we do not have the CA for msn.com(they are not the same)
+
+    java -jar customcerts-1.0-SNAPSHOT-jar-with-dependencies.jar https://msn.com
+    Set TrustStore to /Users/mturner/source-code/CustomCertsGH/target/cacerts
+    javax.net.ssl.SSLHandshakeException: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+
+
+
