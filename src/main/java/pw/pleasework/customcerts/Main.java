@@ -1,8 +1,10 @@
 package pw.pleasework.customcerts;
 
-import org.apache.http.client.fluent.Request;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import java.io.File;
-import java.io.IOException;
 
 public class Main {
     public static void main(String[] args){
@@ -11,12 +13,15 @@ public class Main {
         System.setProperty("javax.net.ssl.trustStore", cacertsFilePath);
         System.out.println(String.format("Set TrustStore to %s", cacertsFilePath));
         try {
-            Request.Get(args[0])
-                    .connectTimeout(1000)
-                    .socketTimeout(1000)
-                    .execute().returnContent().asString();
-            System.out.println("Success, no errors");
-        } catch (IOException e) {
+
+            DefaultHttpClient mHttpClient = new DefaultHttpClient();
+
+            HttpGet theHttpGet = new HttpGet(args[0]);
+            HttpResponse theHttpResponse = mHttpClient.execute(theHttpGet);
+
+            System.out.println(theHttpResponse.getStatusLine().getStatusCode());
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
